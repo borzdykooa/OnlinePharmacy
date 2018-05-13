@@ -1,6 +1,5 @@
 package by.itacademy.servlet;
 
-import by.itacademy.dto.MedicineDto;
 import by.itacademy.entity.Medicine;
 import by.itacademy.service.MedicineService;
 import by.itacademy.util.JspPath;
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/medicinesInGroup")
+@WebServlet(value = "/medicinesInGroup", name = "medicinesInGroup")
 public class ViewMedicineInGroupServlet extends HttpServlet {
 
     @Override

@@ -21,47 +21,25 @@ public class MedicineValidator implements Validator<MedicineDto> {
     public List<String> validate(MedicineDto object) {
         List<String> errors = new ArrayList<>();
         if (StringUtil.isEmpty(object.getName()) || object.getName().length() > MAX_LENGTH_VARCHAR) {
-            errors.add("Название лекарства пустое или слишком длинное");
+            errors.add("Поле 'Название лекарства' не заполнено");
         }
         if (StringUtil.isEmpty(object.getDescription())) {
-            errors.add("Описание пустое");
+            errors.add("Поле 'Описание' не заполнено");
         }
 
         Double price = PriceFormat.format(object.getPrice());
         if (price == null|| object.getPrice().length() > MAX_LENGTH_NUMERIC) {
-            errors.add("Цена слишком длинная, пустая или неверного формата");
+            errors.add("Поле 'Цена' не заполнено либо заполнено в неверном формате");
         }
 
         Long quantity= QuantityFormat.format(object.getQuantity());
         if (quantity == null) {
-            errors.add("Количество пустое или неверного формата");
+            errors.add("Поле 'Количество' не заполнено либо заполнено в неверном формате");
         }
-
-//        Long id= QuantityFormat.format(object.getGroupId());
-//        if (id == null) {
-//            errors.add("У id группы лекарств неверный формат, такой группы лекарств нет или поле не заполнено");
-//        }
 
         return errors;
     }
 
-    //Валидатор на дату исполнения заказа
-//    @Override
-//    public List<String> validate(MedicineDto object) {
-//        List<String> errors = new ArrayList<>();
-//        if (StringUtil.isEmpty(object.getDescription()) || object.getDescription().length() > DESCRIPTION_MAX_LENGTH) {
-//            errors.add("Description is empty or too long");
-//        }
-//        LocalDate localDate = LocalDateFormat.format(object.getDate());
-//        if (localDate == null) {
-//            errors.add("Date field has incorrect format");
-//        } else if (localDate.isBefore(LocalDate.now())) {
-//            errors.add("Date is in past");
-//        }
-//
-//        return errors;
-//    }
-//
     public static MedicineValidator getInstance() {
         return INSTANCE;
     }

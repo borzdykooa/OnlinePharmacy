@@ -20,7 +20,8 @@ public final class PriceFormat {
                 Pattern pattern = Pattern.compile(PATTERN);
                 Matcher matcher = pattern.matcher(value);
                 if (matcher.find()) {
-                    price = Double.parseDouble(value);                }
+                    price = Double.parseDouble(value);
+                }
 
             } catch (DateTimeParseException e) {
             }
@@ -28,13 +29,4 @@ public final class PriceFormat {
 
         return price;
     }
-
-//    public static String format(LocalDate value) {
-//        String formattedValue = null;
-//        if (value != null) {
-//            formattedValue = FORMATTER.format(value);
-//        }
-//
-//        return formattedValue;
-//    }
 }

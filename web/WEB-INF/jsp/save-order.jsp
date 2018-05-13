@@ -1,38 +1,38 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="lib-content.jsp" %>
 <html>
 <head>
     <title>Title</title>
+    <%@include file="styles.jsp" %>
+
 </head>
 <body>
+
+<%@include file="header.jsp" %>
+
 <form action="${pageContext.request.contextPath}/saveOrder" method="post">
-    Дата заказа: <input type="text" name="dateOfOrder" value="${requestScope.dateOfOrder}"><br>
-    Дата закрытия заказа: <input type="text" name="orderClothingDate" value="${requestScope.orderClothingDate}"><br>
-    Статус заказа: <br>
-    <input type="radio" name="status" value="DONE"> выполнен
-    <input type="radio" name="status" value="PROCESSED"> в процессе обработки <br>
 
-    Клиент:<br>
-    <select name="user">
-        <c:forEach var="user" items="${requestScope.users}">
-            <option value="${user.id}">${user.fullName} ${user.user.login} </option>
+    <input type="hidden" name="user" value="${sessionScope.currentUser.id}"/><br>
+
+    <h3>Список заказываемых лекарств:</h3>
+    <br>
+    <ol>
+        <c:forEach var="item" items="${sessionScope.addToBasket}">
+            <li><h4>${item.medicineName}.</h4>
+                Цена: ${item.medicinePrice} бел.руб. <br>
+                Количество упаковок: ${item.orderQuantity} <br>
+                Стоимость: ${item.sum} бел.руб.<br>
+            </li>
+            <br>
+            <br>
         </c:forEach>
-    </select><br>
+    </ol>
+    <h4>Общая стоимость заказа: <input type="hidden" name="totalSum"
+                                       value="${sessionScope.totalSum}"/> ${sessionScope.totalSum} бел.руб.</h4>
+    <br>
 
-    ID заказа: <input type="text" name="order" value="${sessionScope.order.id}"><br>
-
-
-    Название лекарства:<br>
-    <select name="medicine">
-        <c:forEach var="medicine" items="${requestScope.medicines}">
-            <option value="${medicine.id}">${medicine.name}</option>
-        </c:forEach>
-    </select><br>
-
-    Количество: <input type="text" name="quantity" value="${requestScope.quantity}"><br>
-
-    <input type="submit" value="Сохранить">
-
+    <input type="submit" value="Сохранить"><br>
+    <br>
 
 </form>
 <c:if test="${not empty requestScope.errors}">
@@ -42,5 +42,7 @@
         </c:forEach>
     </div>
 </c:if>
+
+<%@include file="footer.jsp" %>
 </body>
 </html>

@@ -8,8 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebFilter("/*")
+@WebFilter(servletNames = {"AddToBasket", "Basket", "DeleteMedicine", "DeleteOrderByDate", "FirstPage", "MedicineFullInfo",
+        "SaveGroup", "SaveMedicine", "SaveOrder", "SavePrescription", "MedicinesPartName", "Success",
+        "UpdateOrderStatusDate", "UpdateQuantity", "Groups", "Medicines", "Orders", "Users", "medicinesInGroup",
+        "OrdersByMedicineId", "OrdersByUserId","Dowmload"})
 public class LoginFilter implements Filter {
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest && servletResponse instanceof HttpServletResponse) {

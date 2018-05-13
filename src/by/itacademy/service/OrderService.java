@@ -1,16 +1,13 @@
 package by.itacademy.service;
 
-
-import by.itacademy.dao.MedicineDao;
 import by.itacademy.dao.OrderDao;
-import by.itacademy.dto.OrderDto;
-import by.itacademy.dto.OrderMedicineDto;
+import by.itacademy.dto.*;
 import by.itacademy.entity.*;
-import by.itacademy.dto.MedicineDto;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -18,41 +15,33 @@ public final class OrderService {
 
     private static final OrderService INSTANCE = new OrderService();
 
-    public void save(OrderDto orderDto, OrderMedicineDto orderMedicineDto) {
+    public void save(OrderDto orderDto, List<OrderMedicineDto> orderMedicineDtos) {
         Order orderRequest = Order.builder()
-                .dateOfOrder(LocalDate.parse(orderDto.getDateOfOrder()))
-                .orderClothingDate(LocalDate.parse(orderDto.getOrderClothingDate()))
-                .status(Status.valueOf(orderDto.getStatus()))
+                .totalSum(Double.valueOf(orderDto.getTotalSum()))
                 .user(User.builder()
                         .id(Long.valueOf(orderDto.getUserId()))
                         .build())
                 .build();
+        List<OrderMedicine> orderMedicineRequests = new ArrayList<>();
+        for (OrderMedicineDto orderMedicineDto : orderMedicineDtos) {
+            OrderMedicine orderMedicineRequest = OrderMedicine.builder()
+                    .medicine(Medicine.builder()
+                            .quantity(Integer.valueOf(orderMedicineDto.getQuantity()))
+                            .id(Long.valueOf(orderMedicineDto.getMedicineId()))
+                            .build())
+                    .quantity(Integer.valueOf(orderMedicineDto.getQuantity()))
+                    .build();
+            orderMedicineRequests.add(orderMedicineRequest);
+        }
+        OrderDao.getInstance().save(orderRequest, orderMedicineRequests);
+    }
 
-        OrderMedicine orderMedicineRequest = OrderMedicine.builder()
-                .order(Order.builder()
-                        .id(Long.valueOf(orderMedicineDto.getOrderId()))
-                        .build())
-                .medicine(Medicine.builder()
-                        .id(Long.valueOf(orderMedicineDto.getMedicineId()))
-                        .build())
+    public void updateOrderStatusDate(OrderStatusDateDto dto) {
+        Order request = Order.builder()
+                .orderClothingDate(LocalDate.parse(dto.getOrderClothingDate()))
+                .id(Long.valueOf(dto.getId()))
                 .build();
-        OrderDao.getInstance().save(orderRequest,orderMedicineRequest);
-    }
-
-    public List<Medicine> findAllMedicines() {
-        return MedicineDao.getInstance().getAllMedicines();
-    }
-
-    public List<Medicine> findAllMedicinesByGroupId(Long groupId) {
-        return MedicineDao.getInstance().getMedicinesByGroupId(groupId);
-    }
-
-    public Medicine getMedicineByMedicineID(Long medicineID) {
-        return MedicineDao.getInstance().getByMedicineID(medicineID);
-    }
-
-    public void delete(Long medicineId) {
-        MedicineDao.getInstance().delete(medicineId);
+        OrderDao.getInstance().updateStatusAndDate(request);
     }
 
     public static OrderService getInstance() {

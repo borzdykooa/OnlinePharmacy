@@ -1,6 +1,5 @@
 package by.itacademy.servlet;
 
-import by.itacademy.dto.MedicineDto;
 import by.itacademy.entity.Medicine;
 import by.itacademy.service.MedicineService;
 import by.itacademy.util.JspPath;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/medicineFullInfo")
+@WebServlet(value = "/medicineFullInfo", name = "MedicineFullInfo")
 public class FullInfoMedicineServlet extends HttpServlet {
 
     @Override

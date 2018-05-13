@@ -3,7 +3,6 @@ package by.itacademy.entity;
 import lombok.Getter;
 
 @Getter
-
 public enum Role {
 
     ADMIN("ADMIN"),
