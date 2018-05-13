@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PrescriptionDto {
+public class OrderStatusDateDto {
 
-    private String name;
-    private String medicineId;
-    private String userId;
+    private String orderClothingDate;
+    private String id;
 }

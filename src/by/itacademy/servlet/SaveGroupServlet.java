@@ -1,6 +1,7 @@
 package by.itacademy.servlet;
 
 import by.itacademy.dto.GroupDto;
+import by.itacademy.entity.Group;
 import by.itacademy.service.GroupService;
 import by.itacademy.util.JspPath;
 import by.itacademy.validation.GroupValidator;
@@ -11,9 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
-@WebServlet("/saveGroup")
+@WebServlet(value = "/saveGroup", name = "SaveGroup")
 public class SaveGroupServlet extends HttpServlet {
 
     @Override
@@ -28,13 +29,25 @@ public class SaveGroupServlet extends HttpServlet {
         String name = req.getParameter("name");
         GroupDto groupDto = new GroupDto(name);
 
+        List<Group> allGroups = GroupService.getInstance().findAllGroups();
+        Set<String> groups = new HashSet<>();
+        for (Group allGroup : allGroups) {
+            groups.add(allGroup.getName());
+        }
+
+        List<String> errors = new ArrayList<>();
         List<String> validateResult = GroupValidator.getInstance().validate(groupDto);
-        if (validateResult.isEmpty()) {
+        if (groups.contains(name)) {
+            errors.add("Такая группа уже существует");
+            req.setAttribute("errors", errors);
+            getServletContext()
+                    .getRequestDispatcher(JspPath.get("save-group"))
+                    .forward(req, resp);
+        } else if (validateResult.isEmpty()) {
             GroupService.getInstance().save(groupDto);
             resp.sendRedirect("/success");
         } else {
             req.setAttribute("errors", validateResult);
-            req.setAttribute("name", name);
 
             getServletContext()
                     .getRequestDispatcher(JspPath.get("save-group"))

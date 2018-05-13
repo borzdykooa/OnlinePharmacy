@@ -1,4 +1,4 @@
-package by.itacademy.entity;
+package by.itacademy.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+public class MedicineQuantityDto {
 
-public class Prescription {
-
-    private Long id;
-    private Long name;
-    private Medicine medicine;
-    private User user;
+    private String quantity;
+    private String id;
 }

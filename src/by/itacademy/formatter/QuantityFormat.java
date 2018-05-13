@@ -20,7 +20,8 @@ public final class QuantityFormat {
                 Pattern pattern = Pattern.compile(PATTERN);
                 Matcher matcher = pattern.matcher(value);
                 if (matcher.find()) {
-                    quantity = Long.parseLong(value);                }
+                    quantity = Long.parseLong(value);
+                }
 
             } catch (DateTimeParseException e) {
             }
@@ -28,13 +29,4 @@ public final class QuantityFormat {
 
         return quantity;
     }
-
-//    public static String format(LocalDate value) {
-//        String formattedValue = null;
-//        if (value != null) {
-//            formattedValue = FORMATTER.format(value);
-//        }
-//
-//        return formattedValue;
-//    }
 }

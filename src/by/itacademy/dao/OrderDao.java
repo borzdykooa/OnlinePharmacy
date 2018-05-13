@@ -1,23 +1,26 @@
 package by.itacademy.dao;
 
 import by.itacademy.connection.ConnectionPool;
-import by.itacademy.entity.Medicine;
-import by.itacademy.entity.Order;
-import by.itacademy.entity.OrderMedicine;
+import by.itacademy.entity.*;
+import by.itacademy.exception.DaoException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-
 public final class OrderDao {
 
     private static final OrderDao INSTANCE = new OrderDao();
 
+    private static final String UPDATE_STATUS_AND_DATE = "UPDATE online_pharmacy.order SET order_clothing_date =?, " +
+            "status=? WHERE id = ?";
+
     private static final String SAVE =
-            "INSERT INTO online_pharmacy.order (date_of_order, order_clothing_date, status, user_id) " +
-                    "VALUES (?, ?, ?, " +
+            "INSERT INTO online_pharmacy.order (date_of_order, order_clothing_date, status, total_sum, user_id) " +
+                    "VALUES (?, '2100-01-01',?, ?, " +
                     "        (SELECT id " +
                     "         FROM online_pharmacy.user " +
                     "         WHERE id = ?))";
@@ -28,21 +31,21 @@ public final class OrderDao {
                     "    FROM online_pharmacy.order " +
                     "    WHERE id = ?), (SELECT id " +
                     "                    FROM online_pharmacy.medicine " +
-                    "                    WHERE id = ?), ?)";
+                    "                    WHERE id = ?),?)";
 
-    public void save(Order order, OrderMedicine orderMedicine) {
+    public void save(Order order, List<OrderMedicine> orderMedicines) {
         Connection connection = null;
         PreparedStatement orderStatement = null;
-        PreparedStatement relationStatement = null;
+        PreparedStatement orderMedicineStatement = null;
         try {
             connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
             orderStatement = connection.prepareStatement(SAVE, Statement.RETURN_GENERATED_KEYS);
-            relationStatement = connection.prepareStatement(SAVE_ORDER_MEDICINE);
+            orderMedicineStatement = connection.prepareStatement(SAVE_ORDER_MEDICINE);
 
-            orderStatement.setDate(1, Date.valueOf(order.getDateOfOrder()));
-            orderStatement.setDate(2, Date.valueOf(order.getOrderClothingDate()));
-            orderStatement.setString(3, order.getStatus().getDescription());
+            orderStatement.setDate(1, Date.valueOf(LocalDate.now()));
+            orderStatement.setString(2, Status.PROCESSED.getDescription());
+            orderStatement.setDouble(3, order.getTotalSum());
             orderStatement.setLong(4, order.getUser().getId());
             orderStatement.executeUpdate();
 
@@ -51,20 +54,20 @@ public final class OrderDao {
                 order.setId(generatedKeys.getLong("id"));
             }
 
-            relationStatement.setLong(1, orderMedicine.getOrder().getId());
-            relationStatement.setLong(2, orderMedicine.getMedicine().getId());
-            relationStatement.setLong(3, orderMedicine.getQuantity());
-            relationStatement.executeUpdate();
-
+            for (OrderMedicine orderMedicine : orderMedicines) {
+                orderMedicineStatement.setLong(1, order.getId());
+                orderMedicineStatement.setLong(2, orderMedicine.getMedicine().getId());
+                orderMedicineStatement.setLong(3, orderMedicine.getQuantity());
+                orderMedicineStatement.executeUpdate();
+            }
             connection.commit();
-
         } catch (SQLException e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                 }
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                throw new DaoException(e1);
             }
             e.printStackTrace();
         } finally {
@@ -75,69 +78,27 @@ public final class OrderDao {
                 if (orderStatement != null) {
                     orderStatement.close();
                 }
-                if (relationStatement != null) {
-                    relationStatement.close();
+                if (orderMedicineStatement != null) {
+                    orderMedicineStatement.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw new DaoException(e);
             }
         }
     }
 
-    private static final String DELETE_ORDER_MEDICINE = "DELETE FROM order_medicine WHERE order_id IN " +
-            "(SELECT id FROM online_pharmacy.order WHERE date_of_order<?)";
+    public void updateStatusAndDate(Order order) {
+        try (Connection connection = ConnectionPool.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_STATUS_AND_DATE)) {
+            preparedStatement.setDate(1, Date.valueOf(order.getOrderClothingDate()));
+            preparedStatement.setString(2, Status.DONE.getDescription());
+            preparedStatement.setLong(3, order.getId());
+            preparedStatement.executeUpdate();
 
-    private static final String DELETE = "DELETE FROM online_pharmacy.order WHERE date_of_order<?";
-
-
-//    private static final String DELETE_RESTAURANT_DISH =
-//            "DELETE FROM restaurant_storage.restaurant_dish WHERE dish_id = ?";
-
-//    private static final String DELETE = "DELETE FROM restaurant_storage.dish WHERE id = ?";
-
-//    public void delete(Long id) {
-//        Connection connection = null;
-//        PreparedStatement restaurantDishStatement = null;
-//        PreparedStatement dishStatement = null;
-//        try {
-//            connection = ConnectionManager.getConnection();
-//            connection.setAutoCommit(false);
-//
-//            restaurantDishStatement = connection.prepareStatement(DELETE_RESTAURANT_DISH);
-//            restaurantDishStatement.setLong(1, id);
-//            restaurantDishStatement.executeUpdate();
-//
-//            dishStatement = connection.prepareStatement(DELETE);
-//            dishStatement.setLong(1, id);
-//            dishStatement.executeUpdate();
-//
-//            connection.commit();
-//        } catch (SQLException e) {
-//            if (connection != null) {
-//                try {
-//                    connection.rollback();
-//                } catch (SQLException e1) {
-//                    e1.printStackTrace();
-//                }
-//            }
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (connection != null) {
-//                    connection.close();
-//                }
-//                if (restaurantDishStatement != null) {
-//                    restaurantDishStatement.close();
-//                }
-//                if (dishStatement != null) {
-//                    dishStatement.close();
-//                }
-//            } catch (SQLException e1) {
-//                e1.printStackTrace();
-//            }
-//        }
-//    }
-
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
 
     public static OrderDao getInstance() {
         return INSTANCE;

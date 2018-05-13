@@ -18,7 +18,7 @@ public class GroupValidator implements Validator<GroupDto> {
     public List<String> validate(GroupDto object) {
         List<String> errors = new ArrayList<>();
         if (StringUtil.isEmpty(object.getName()) || object.getName().length() > MAX_LENGTH_VARCHAR) {
-            errors.add("Название группы лекарств пустое или слишком длинное");
+            errors.add("Поле 'Название группы лекарств' не заполнено");
         }
 
         return errors;

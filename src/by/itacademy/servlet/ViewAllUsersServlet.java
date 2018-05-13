@@ -1,13 +1,7 @@
 package by.itacademy.servlet;
 
-import by.itacademy.entity.Group;
-import by.itacademy.entity.Medicine;
 import by.itacademy.entity.PersonalData;
-import by.itacademy.entity.User;
-import by.itacademy.service.GroupService;
-import by.itacademy.service.MedicineService;
 import by.itacademy.service.PersonalDataService;
-import by.itacademy.service.UserService;
 import by.itacademy.util.JspPath;
 
 import javax.servlet.ServletException;
@@ -16,10 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
-@WebServlet("/users")
+@WebServlet(value = "/users",name = "Users")
 public class ViewAllUsersServlet extends HttpServlet {
 
     @Override
@@ -31,4 +24,3 @@ public class ViewAllUsersServlet extends HttpServlet {
                 .forward(req, resp);
     }
 }
-//        req.setAttribute("users", PersonalDataService.getInstance().findAllClients());

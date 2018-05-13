@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderMedicineDto {
 
-    private String orderId;
     private String medicineId;
     private String quantity;
 }

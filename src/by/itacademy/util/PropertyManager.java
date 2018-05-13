@@ -3,15 +3,9 @@ package by.itacademy.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
-/**
- * Created by 1 on 11.03.2018.
- */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PropertyManager {
 

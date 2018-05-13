@@ -18,10 +18,6 @@ public final class PersonalDataDao {
 
     private static final PersonalDataDao INSTANCE = new PersonalDataDao();
 
-    private static final String SAVE =
-            "INSERT INTO online_pharmacy.personal_data (full_name,date_of_birth, telephone_number, address, user_id) VALUES " +
-                    "(?,?,?,?,(SELECT id FROM online_pharmacy.user WHERE id = ?))";
-
     private static final String GET_ALL_CLIENTS =
             "SELECT " +
                     "                      pd.id             AS pd_id, " +
@@ -35,7 +31,6 @@ public final class PersonalDataDao {
                     "                      u.role              AS user_role " +
                     "                    FROM online_pharmacy.user u " +
                     "                      INNER JOIN online_pharmacy.personal_data pd ON pd.user_id = u.id ";
-//                    "WHERE u.role='Клиент'";
 
     public List<PersonalData> getAllClients() {
         List<PersonalData> personalDataList = new ArrayList<PersonalData>();
@@ -66,26 +61,6 @@ public final class PersonalDataDao {
         }
 
         return personalDataList;
-    }
-
-    public void save(PersonalData personalData) {
-        try (Connection connection = ConnectionPool.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SAVE, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, personalData.getFullName());
-            preparedStatement.setDate(2, Date.valueOf(personalData.getDateOfBirth()));
-            preparedStatement.setString(3, personalData.getTelephoneNumber());
-            preparedStatement.setString(4, personalData.getAddress());
-            preparedStatement.setLong(5, personalData.getUser().getId());
-
-
-            preparedStatement.executeUpdate();
-            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                personalData.setId(generatedKeys.getLong("id"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public static PersonalDataDao getInstance() {

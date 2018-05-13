@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-
 public final class MedicineDao {
 
     private static final MedicineDao INSTANCE = new MedicineDao();
@@ -48,21 +47,66 @@ public final class MedicineDao {
             "  INNER JOIN online_pharmacy.group g ON m.group_id = g.id " +
             "WHERE m.id = ?";
 
-    private static final String GET_ORDER_BY_MEDICINE_ID = "SELECT m.id AS medicine_id, m.name AS medicine_name, " +
-            "o.id AS order_id, o.date_of_order AS date_of_order, o.order_clothing_date AS order_clothing_date, " +
-            "o.quantity AS order_quantity " +
+    private static final String GET_MEDICINE_BY_GROUP_ID = "SELECT " +
+            "  m.id          AS medicine_id, " +
+            "  m.name        AS medicine_name " +
             "FROM online_pharmacy.medicine m " +
-            "INNER JOIN online_pharmacy.order_medicine om ON om.medicine_id=m.id " +
-            "INNER JOIN online_pharmacy.order o ON om.order_id=o.id " +
-            "WHERE m.id =?";
-
-    private static final String GET_MEDICINE_BY_GROUP_ID = "SELECT "+
-            "  m.id          AS medicine_id, "+
-            "  m.name        AS medicine_name "+
-            "FROM online_pharmacy.medicine m "+
             "WHERE group_id=?";
 
     private static final String DELETE = "DELETE FROM online_pharmacy.medicine WHERE id = ?";
+
+    private static final String UPDATE_QUANTITY = "UPDATE online_pharmacy.medicine SET quantity = ? WHERE id = ?";
+
+    private static final String GET_MEDICINE_BY_PART_NAME = "SELECT " +
+            "  m.id          AS medicine_id, " +
+            "  m.name        AS medicine_name, " +
+            "  m.description AS medicine_description, " +
+            "  m.price       AS medicine_price, " +
+            "  m.quantity    AS medicine_quantity, " +
+            "  g.name        AS group_name " +
+            "FROM online_pharmacy.medicine m " +
+            "  INNER JOIN online_pharmacy.group g ON m.group_id = g.id " +
+            "WHERE m.name ILIKE ?";
+
+    public List<Medicine> getMedicinesByPartName(String partName) {
+        List<Medicine> medicines = new ArrayList<Medicine>();
+        try (Connection connection = ConnectionPool.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(GET_MEDICINE_BY_PART_NAME)) {
+            preparedStatement.setString(1, partName + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Medicine medicine = Medicine.builder()
+                        .id(resultSet.getLong("medicine_id"))
+                        .name(resultSet.getString("medicine_name"))
+                        .description(resultSet.getString("medicine_description"))
+                        .price(resultSet.getDouble("medicine_price"))
+                        .quantity(resultSet.getInt("medicine_quantity"))
+                        .group(Group.builder()
+                                .name(resultSet.getString("group_name"))
+                                .build())
+                        .build();
+
+                medicines.add(medicine);
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
+        return medicines;
+    }
+
+    public void updateQuantity(Medicine medicine) {
+        try (Connection connection = ConnectionPool.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_QUANTITY)) {
+            preparedStatement.setLong(1, medicine.getQuantity());
+            preparedStatement.setLong(2, medicine.getId());
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
 
     public List<Medicine> getMedicinesByGroupId(Long groupId) {
         List<Medicine> medicines = new ArrayList<Medicine>();
@@ -79,41 +123,12 @@ public final class MedicineDao {
 
                 medicines.add(medicine);
             }
-
         } catch (SQLException e) {
             throw new DaoException(e);
         }
 
         return medicines;
     }
-
-    public Medicine getOrderByID(Long medicineId) {
-        Medicine medicine = null;
-        try (Connection connection = ConnectionPool.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(GET_ORDER_BY_MEDICINE_ID)) {
-            preparedStatement.setLong(1, medicineId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            medicine = new Medicine();
-            while (resultSet.next()) {
-                medicine.setId(resultSet.getLong("medicine_id"));
-                medicine.setName(resultSet.getString("medicine_name"));
-//                medicine.getOrders().add(Order.builder()
-//                        .id(resultSet.getLong("order_id"))
-//                        .dateOfOrder(resultSet.getDate("date_of_order"))
-//                        .orderClothingDate(resultSet.getDate("order_clothing_date"))
-//                        .quantity(resultSet.getInt("order_quantity"))
-//                        .build());
-
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-
-        return medicine;
-    }
-
-
 
     public void delete(Long id) {
         try (Connection connection = ConnectionPool.getConnection();
@@ -144,7 +159,6 @@ public final class MedicineDao {
                                 .name(resultSet.getString("group_name"))
                                 .build())
                         .build();
-
             }
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -170,10 +184,8 @@ public final class MedicineDao {
                                 .name(resultSet.getString("group_name"))
                                 .build())
                         .build();
-
                 medicines.add(medicine);
             }
-
         } catch (SQLException e) {
             throw new DaoException(e);
         }

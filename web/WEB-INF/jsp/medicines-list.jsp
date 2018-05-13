@@ -1,14 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="lib-content.jsp" %>
 <html>
 <head>
     <title>Title</title>
+    <%@include file="styles.jsp" %>
+
 </head>
 <body>
-<c:if test="${not empty sessionScope.currentUser}">
-<%--<c:if test="${not empty sessionScope.currentUser and sessionScope.currentUser.login == 'admin'}">--%>
-    <a href="${pageContext.request.contextPath}/logout">Logout</a><br>
-</c:if>
+
+<%@include file="header.jsp" %>
+
 <div>
     <h3>Список лекарств:</h3>
     <ol>
@@ -19,5 +20,7 @@
         </c:forEach>
     </ol>
 </div>
+
+<%@include file="footer.jsp" %>
 </body>
 </html>

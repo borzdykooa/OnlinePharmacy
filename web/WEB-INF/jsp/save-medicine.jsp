@@ -1,15 +1,20 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="lib-content.jsp" %>
 <html>
 <head>
     <title>Title</title>
+    <%@include file="styles.jsp" %>
+
 </head>
 <body>
+
+<%@include file="header.jsp" %>
+
 <form action="${pageContext.request.contextPath}/saveMedicine" method="post">
-    Название лекарства: <input type="text" name="name" value="${requestScope.name}"><br>
-    Описание: <input type="text" name="description" value="${requestScope.description}"><br>
-    Цена: <input type="text" name="price" placeholder="*.**" value="${requestScope.price}"><br>
-    Количество: <input type="text" name="quantity" value="${requestScope.quantity}"><br>
+    Название лекарства: <input type="text" name="name" value="${param.name}"><br>
+    Описание: <input type="text" name="description" value="${param.description}"><br>
+    Цена: <input type="text" name="price" placeholder="*.**" value="${param.price}"><br>
+    Количество: <input type="text" name="quantity" value="${param.quantity}"><br>
     Группа лекарств:<br>
     <select name="group">
         <c:forEach var="group" items="${requestScope.groups}">
@@ -25,5 +30,7 @@
         </c:forEach>
     </div>
 </c:if>
+
+<%@include file="footer.jsp" %>
 </body>
 </html>

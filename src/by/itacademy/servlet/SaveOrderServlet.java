@@ -1,14 +1,11 @@
 package by.itacademy.servlet;
 
-import by.itacademy.dto.MedicineDto;
+import by.itacademy.dto.BasketDto;
+import by.itacademy.dto.MedicineQuantityDto;
 import by.itacademy.dto.OrderDto;
 import by.itacademy.dto.OrderMedicineDto;
-import by.itacademy.service.GroupService;
-import by.itacademy.service.MedicineService;
-import by.itacademy.service.OrderService;
-import by.itacademy.service.PersonalDataService;
+import by.itacademy.service.*;
 import by.itacademy.util.JspPath;
-import by.itacademy.validation.MedicineValidator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,15 +13,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/saveOrder")
+@WebServlet(value = "/saveOrder", name = "SaveOrder")
 public class SaveOrderServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("medicines", MedicineService.getInstance().findAllMedicines());
-        req.setAttribute("users", PersonalDataService.getInstance().findAllClients());
         getServletContext()
                 .getRequestDispatcher(JspPath.get("save-order"))
                 .forward(req, resp);
@@ -32,32 +28,28 @@ public class SaveOrderServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String dateOfOrder = req.getParameter("dateOfOrder");
-        String orderClothingDate = req.getParameter("orderClothingDate");
-        String status = req.getParameter("status");
         String user = req.getParameter("user");
-        OrderDto orderDto=new OrderDto(dateOfOrder,orderClothingDate,status,user);
+        String totalSum = req.getParameter("totalSum");
+        OrderDto orderDto = new OrderDto(user, totalSum);
 
-        String order = req.getParameter("order");
-        String medicine = req.getParameter("medicine");
-        String quantity = req.getParameter("quantity");
-        OrderMedicineDto orderMedicineDto=new OrderMedicineDto(order,medicine,quantity);
+        List<BasketDto> basket = (List<BasketDto>) req.getSession().getAttribute("addToBasket");
+        List<OrderMedicineDto> orderMedicineDtos = (List<OrderMedicineDto>) req.getAttribute("orderMedicineDtos");
 
-//        List<String> validateResult = MedicineValidator.getInstance().validate(medicineDto);
-//        if (validateResult.isEmpty()) {
-            OrderService.getInstance().save(orderDto,orderMedicineDto);
-            resp.sendRedirect("/success");
-//        } else {
-//            req.setAttribute("errors", validateResult);
-//            req.setAttribute("name", name);
-//            req.setAttribute("description", description);
-//            req.setAttribute("price", price);
-//            req.setAttribute("quantity", quantity);
-//            req.setAttribute("groups", GroupService.getInstance().findAllGroups());
-//
-//            getServletContext()
-//                    .getRequestDispatcher(JspPath.get("save-medicine"))
-//                    .forward(req, resp);
-//        }
+        for (BasketDto aBasket : basket) {
+            if (orderMedicineDtos == null) {
+                orderMedicineDtos = new ArrayList<>();
+            }
+            String medicineId = aBasket.getMedicineId();
+            String quantity = aBasket.getOrderQuantity();
+            orderMedicineDtos.add(new OrderMedicineDto(medicineId, quantity));
+
+            String newQuantity=aBasket.getNewQuantity();
+            MedicineQuantityDto medicineQuantityDto = new MedicineQuantityDto(newQuantity, medicineId);
+            MedicineService.getInstance().updateMedicineQuantity(medicineQuantityDto);
+        }
+
+        OrderService.getInstance().save(orderDto, orderMedicineDtos);
+        req.getSession().removeAttribute("addToBasket");
+        resp.sendRedirect("/success");
     }
 }
